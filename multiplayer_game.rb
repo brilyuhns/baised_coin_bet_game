@@ -36,6 +36,7 @@ class MultiplayerGame
 end
 
 class Player
+  attr_accessor :strategy
   def initialize strategy
     @strategy = strategy.new
     @balance = 25
@@ -91,6 +92,9 @@ class Bet
 end
 
 class Strategy
+  def to_s
+    self.class.name
+  end
 end
 class AlwaysHeads < Strategy
   def next_bet(bets, outcomes)
@@ -118,7 +122,23 @@ def run_game
     players << Player.new(ProbabilityBasedBet)
     game = MultiplayerGame.new(players)
     game.play
-    puts players.map(&:to_s)
+    players
 end
 
-run_game
+
+def analyse
+  all_games = 100.times.map{run_game}
+  all_games.first.each_with_index do |games, idx|
+    all_games_for_player = all_games.map{|a| a[idx]}
+    loses = all_games_for_player.count(&:is_bankrupt?)
+    avg = all_games_for_player.inject(0){|sum, player| sum += player.balance }/100
+    puts ">"*100
+    puts "Strategy: #{all_games_for_player.first.strategy}"
+    puts "loses: #{loses}"
+    puts "avg_earnings: #{avg}"
+    puts "min_earnings: #{all_games_for_player.map(&:balance).min}"
+    puts "max_earnings: #{all_games_for_player.map(&:balance).max}"
+  end
+end
+
+analyse
