@@ -49,19 +49,19 @@ class Game
   end
 end
 
-class Strategy1
+class AlwaysHeads
   def next_bet(bets, outcomes)
     Bet.new(1, 5)
   end
 end
 
-class Strategy2
+class RandomBet
   def next_bet(bets, outcomes)
     Bet.new(rand(0..1), 5)
   end
 end
 
-class Strategy3
+class BetBasedonProbability
   def next_bet(bets, outcomes)
     return Bet.new(1, 5) if bets.count == 0
     choice = (outcomes.count(1)/outcomes.count.to_f) > 0.6 ? 0 : 1
@@ -84,6 +84,6 @@ def run_for_hundred_games strategy
   puts "max balance: #{games.max}"
 end
 
-run_for_hundred_games(Strategy1)
-run_for_hundred_games(Strategy2)
-run_for_hundred_games(Strategy3)
+run_for_hundred_games(AlwaysHeads)
+run_for_hundred_games(RandomBet)
+run_for_hundred_games(BetBasedonProbability)
