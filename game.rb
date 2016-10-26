@@ -45,15 +45,9 @@ class Strategy1
   end
 end
 
-
-game = Game.new(Strategy1.new)
-game.play
-puts game.balance
-
 class Strategy2
-   def next_bet(bets, outcomes)
-    return 1 if bets.count == 0
-    Rational(bets.count(1)/bets.count) > 0.6 ? 1 : 0
+  def next_bet(bets, outcomes)
+    rand(0..1)
   end
 
   def next_bet_amount(bets, outcomes)
@@ -61,24 +55,32 @@ class Strategy2
   end
 end
 
-game = Game.new(Strategy2.new)
-game.play
-puts game.balance
+class Strategy3
+   def next_bet(bets, outcomes)
+    return 1 if bets.count == 0
+    Rational(outcomes.count(1)/outcomes.count) > 0.6 ? 1 : 0
+  end
 
-
-100_games_strategy1 =
-
+  def next_bet_amount(bets, outcomes)
+    5
+  end
+end
 
 def run_for_hundred_games strategy
   games = 100.times.map do
-    game = Game.new(Strategy1.new)
+    game = Game.new(instance_eval "#{strategy}.new")
     game.play
     game.balance
   end
+  puts "strategy #{strategy}"
   lost_games = games.select{|a| a < 0}
   puts "lost games #{lost_games}"
   avg_balance = games.inject(0){|sum, i| sum+=1 }
   puts "avg_balance: #{avg_balance}"
-  puts "min balance: games.min"
-  puts "max balance: games.max"
+  puts "min balance: #{games.min}"
+  puts "max balance: #{games.max}"
 end
+
+run_for_hundred_games(Strategy1)
+run_for_hundred_games(Strategy2)
+run_for_hundred_games(Strategy3)
