@@ -107,7 +107,7 @@ end
 class Strategy3
    def next_bet(bets, outcomes)
     return Bet.new(1, 5) if bets.count == 0
-    choice = Rational(bets.count(1)/bets.count) > 0.6 ? 1 : 0
+    choice = (outcomes.count(1)/outcomes.count.to_f) > 0.6 ? 0 : 1
     Bet.new(choice, 5)
   end
 end
