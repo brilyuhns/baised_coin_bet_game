@@ -48,7 +48,7 @@ class Player
   end
 
   def next_bet(outcomes)
-    @bets << @strategy.next_bet(@bets, outcomes)
+    @bets << @strategy.next_bet(@bets, outcomes, balance)
     @bets.last
   end
 
@@ -65,7 +65,7 @@ class Player
   end
 
   def to_s
-    str = ["strategy: #{@strategy.class.name}"]
+    str = ["strategy: #{@strategy}"]
     str << "balance: #{balance}"
     str.join("\n")
   end
@@ -97,29 +97,39 @@ class Strategy
   end
 end
 class AlwaysHeads < Strategy
-  def next_bet(bets, outcomes)
+  def next_bet(bets, outcomes, balance)
     Bet.new(1, 5)
   end
 end
 
 class RandomBet < Strategy
-  def next_bet(bets, outcomes)
+  def next_bet(bets, outcomes, balance)
     Bet.new(rand(0..1), 5)
   end
 end
 
 class ProbabilityBasedBet < Strategy
-  def next_bet(bets, outcomes)
+  def next_bet(bets, outcomes, balance)
     return Bet.new(1, 5) if bets.count == 0
     choice = (outcomes.count(1)/outcomes.count.to_f) > 0.6 ? 0 : 1
     Bet.new(choice, 5)
   end
 end
 
+class ProbabilityAndBetAmount < Strategy
+  def next_bet(bets, outcomes, balance)
+    return Bet.new(1, 5) if bets.count == 0
+    choice = (outcomes.count(1)/outcomes.count.to_f) > 0.6 ? 0 : 1
+    Bet.new(choice, (balance*0.3).round)
+  end
+end
+
+
 def run_game
     players = [Player.new(AlwaysHeads)]
     players << Player.new(RandomBet)
     players << Player.new(ProbabilityBasedBet)
+    players << Player.new(ProbabilityAndBetAmount)
     game = MultiplayerGame.new(players)
     game.play
     players
