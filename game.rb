@@ -76,7 +76,7 @@ def run_for_hundred_games strategy
     game.balance
   end
   puts "strategy #{strategy}"
-  lost_games = games.select{|a| a < 0}
+  lost_games = games.select{|a| a <= 0}.count
   puts "lost games #{lost_games}"
   avg_balance = games.inject(0){|sum, i| sum+=1 }
   puts "avg_balance: #{avg_balance}"
