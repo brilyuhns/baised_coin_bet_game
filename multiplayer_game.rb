@@ -12,28 +12,26 @@ class MultiplayerGame
 
   def play
     300.times do
-      current_toss = toss
-      @outcomes << current_toss
-      @players.each do |player|
-        calculate_outcome(player, current_toss)
+      @outcomes << toss
+      valid_players.each do |player|
+        calculate_outcome(player, @outcomes.last)
       end
-      update_valid_players
     end
   end
 
   def calculate_outcome(player, toss)
     bet = player.next_bet(@outcomes)
     if bet.choice == toss
-      # puts "Player: #{player}; Bet: #{bet}; toss: #{toss}; win"
+      # puts "Player: #{player}; Bet: #{bet}; outcomes: #{@outcomes}; win"
       player.add_to_balance(bet.amount)
     else
-      # puts "Player: #{player}; Bet: #{bet}; toss: #{toss}; lose"
+      # puts "Player: #{player}; Bet: #{bet}; outcomes: #{@outcomes}; lose"
       player.deduct_from_balance(bet.amount)
     end
   end
 
-  def update_valid_players
-    @players.reject!(&:is_bankrupt?)
+  def valid_players
+    @players.reject(&:is_bankrupt?)
   end
 end
 
@@ -114,7 +112,9 @@ end
 
 
 def run_game
-    players = [Player.new(Strategy1)]
+    players = [Player.new(Strategy3)]
+    players << Player.new(Strategy2)
+    players << Player.new(Strategy3)
     game = MultiplayerGame.new(players)
     game.play
     puts players.map(&:to_s)
