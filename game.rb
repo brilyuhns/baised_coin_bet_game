@@ -1,3 +1,18 @@
+class Bet
+  def initialize(choice, amount)
+    @choice = choice
+    @amount = amount
+  end
+
+  def choice
+    @choice
+  end
+
+  def amount
+    @amount
+  end
+end
+
 class Game
 
   attr_accessor :balance, :bet_amount
@@ -16,16 +31,15 @@ class Game
   def play
     300.times do
       bet = @strategy.next_bet(@bets, @outcomes)
-      bet_amount = @strategy.next_bet_amount(@bets, @outcomes)
       current_outcome = outcome
-      @bets << bet
+      @bets << bet.choice
       @outcomes << current_outcome
-      if bet == current_outcome
-        @balance += bet_amount
+      if bet.choice == current_outcome
+        @balance += bet.amount
       else
-        @balance -= bet_amount
+        @balance -= bet.amount
       end
-      # puts "#{{ cur_outcome: current_outcome, bet: bet, balance: @balance }}"
+      # puts "#{{ cur_outcome: current_outcome, bet.choice: bet, balance: @balance }}"
       break if @balance <= 0
     end
   end
@@ -37,32 +51,21 @@ end
 
 class Strategy1
   def next_bet(bets, outcomes)
-    1
-  end
-
-  def next_bet_amount(bets, outcomes)
-    5
+    Bet.new(1, 5)
   end
 end
 
 class Strategy2
   def next_bet(bets, outcomes)
-    rand(0..1)
-  end
-
-  def next_bet_amount(bets, outcomes)
-    5
+    Bet.new(rand(0..1), 5)
   end
 end
 
 class Strategy3
    def next_bet(bets, outcomes)
-    return 1 if bets.count == 0
-    Rational(outcomes.count(1)/outcomes.count) > 0.6 ? 1 : 0
-  end
-
-  def next_bet_amount(bets, outcomes)
-    5
+    return Bet.new(1, 5) if bets.count == 0
+    choice = Rational(outcomes.count(1)/outcomes.count) > 0.6 ? 1 : 0
+    Bet.new(choice, 5)
   end
 end
 
