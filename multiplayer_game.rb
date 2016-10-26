@@ -37,8 +37,8 @@ end
 
 class Player
   attr_accessor :strategy
-  def initialize strategy
-    @strategy = strategy.new
+  def initialize strategy, strategy_options={}
+    @strategy = strategy.new(strategy_options)
     @balance = 25
     @bets = []
   end
@@ -92,6 +92,7 @@ class Bet
 end
 
 class Strategy
+  def initialize(options); end
   def to_s
     self.class.name
   end
@@ -117,19 +118,33 @@ class ProbabilityBasedBet < Strategy
 end
 
 class ProbabilityAndBetAmount < Strategy
+  def initialize(options={})
+    @percent = options.fetch(:percent){ 0.3 }
+    @rounding_function = options.fetch(:rounding_function){ :ceil }
+  end
+
   def next_bet(bets, outcomes, balance)
     return Bet.new(1, 5) if bets.count == 0
     choice = (outcomes.count(1)/outcomes.count.to_f) > 0.6 ? 0 : 1
-    Bet.new(choice, (balance*0.3).round)
+    amount = (balance*@percent)
+    amount = amount.send(@rounding_function) if @rounding_function != :none
+    Bet.new(choice, amount)
+  end
+
+  def to_s
+    "ProbabilityAndBetAmount to #{@percent} with #{@rounding_function}"
   end
 end
 
 
 def run_game
-    players = [Player.new(AlwaysHeads)]
+    players = []
+    players << Player.new(AlwaysHeads)
     players << Player.new(RandomBet)
     players << Player.new(ProbabilityBasedBet)
     players << Player.new(ProbabilityAndBetAmount)
+    players << Player.new(ProbabilityAndBetAmount, { percent: 0.2 })
+    players << Player.new(ProbabilityAndBetAmount, { percent: 0.2, rounding_function: :none })
     game = MultiplayerGame.new(players)
     game.play
     players
@@ -137,11 +152,13 @@ end
 
 
 def analyse
-  all_games = 100.times.map{run_game}
+  no_of_runs = 1000
+  all_games = no_of_runs.times.map{run_game}
   all_games.first.each_with_index do |games, idx|
     all_games_for_player = all_games.map{|a| a[idx]}
     loses = all_games_for_player.count(&:is_bankrupt?)
-    avg = all_games_for_player.inject(0){|sum, player| sum += player.balance }/100
+    avg = all_games_for_player.inject(0){|sum, player| sum += player.balance }/no_of_runs.to_f
+    # puts all_games_for_player.map(&:balance)
     puts ">"*100
     puts "Strategy: #{all_games_for_player.first.strategy}"
     puts "loses: #{loses}"
