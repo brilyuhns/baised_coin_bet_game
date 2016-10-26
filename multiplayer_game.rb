@@ -99,13 +99,8 @@ class Strategy1
 end
 
 class Strategy2
-
-  def initialize
-    @space = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1]
-  end
-
   def next_bet(bets, outcomes)
-    Bet.new(@space.sample, 5)
+    Bet.new(rand(0..1), 5)
   end
 end
 
